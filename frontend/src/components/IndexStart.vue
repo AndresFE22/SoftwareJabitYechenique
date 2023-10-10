@@ -54,7 +54,7 @@
     background-image: url('../assets/fondo.jpg');
     height: 100vh;
   } 
-
+s   
   .img {
   text-align: center;
 }
