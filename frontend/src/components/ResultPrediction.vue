@@ -12,11 +12,13 @@
   export default {
     methods: {
       predecirRendimiento() {
-        // Lógica para predecir rendimiento aquí
       },
       entrenarModelo() {
         // Lógica para entrenar modelo aquí
       }
+    },
+    mounted() {
+      console.log(this.$store.state.userId)
     }
   }
   </script>
