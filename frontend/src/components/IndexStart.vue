@@ -24,23 +24,50 @@
         <img src="@/assets/logoActualizado.jpg" alt="Logo UNICOR" />
       </div>  
     </div>
+    <v-dialog v-model="dialog" max-width="400px">
+    <v-card class="card">
+      <v-card-title class="cardTitle">
+        <span class="headline"><h3>Modelo entrenado</h3></span>
+      </v-card-title>
+    </v-card>
+  </v-dialog>
   </div>
 </template>
 
 <script>
 export default {
+  data() {
+    return {
+      dialog: false
+    }
+  },
   methods: {
     predecirRendimiento() {
       this.$router.push('/prediction')
     },
     entrenarModelo() {
-      // Implementa tu lógica aquí
+      this.dialog = true
     }
   }
 }
 </script>
 
 <style scoped>
+
+
+.cardTitle {
+  display: grid;
+  place-items: center;
+  color: #0066ffb0;
+width: auto;
+}
+
+.card {
+ background-color: white;
+ width: auto;
+
+}
+
 .background {
   display: grid;
   place-items: center;

@@ -1,7 +1,6 @@
 from flask import Flask, render_template, request, jsonify, session
 import pandas as pd
 from flask_cors import CORS
-import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.model_selection import train_test_split
@@ -66,10 +65,12 @@ def predecir_rtpc():
         y_pred = tree_model.predict(X_test)
         precision = accuracy_score(y_test, y_pred)
         print(f'Precisión en el conjunto: {precision*100:.2f}%')
-
+        porcentaje = f'{precision*100:.2f}%'
 
         prediction = tree_model.predict(np.array(input_data).reshape(1, -1))
         print(prediction)
+        print(porcentaje)
+
     
         mensajeprediccion = ''
     
@@ -86,12 +87,12 @@ def predecir_rtpc():
         jsonFeatures = json.dumps(input_data)
         # Conectar a la base de datos
 
-        cursor = conn.cursor()
-        sql = "INSERT INTO reporteestudiantes (name, features, prediction) VALUES (%s, %s, %s)"
-        cursor.execute(sql, (name, jsonFeatures, int(prediction[0])))
+        cursor = conn.cursor(buffered=True)
+        sql = "INSERT INTO reporteestudiantes (name, features, prediction, accuracy) VALUES (%s, %s, %s, %s)"
+        cursor.execute(sql, (name, jsonFeatures, int(prediction[0]), porcentaje))
+        conn.commit()
         new_id = cursor.lastrowid  # Obtiene el ID del nuevo registro
         cursor.close()
-        conn.close()
 
         return jsonify({'id': new_id, 'message': mensajeprediccion})
 
@@ -100,20 +101,42 @@ def predecir_rtpc():
 @app.route('/prediction/<int:id>', methods=['GET', 'POST'])
 def resultPrediction(id):
     
+
+    conn = mysql.connector.connect(
+        host='localhost',
+        user='root',
+        password='',
+        database='prediccionrendimiento'
+    )
+    
     id_student = id
-    cursor = conn.cursor()
-    sql = "SELECT prediction FROM reporteestudiantes WHERE id = %s"
+    cursor = conn.cursor(buffered=True)
+    sql = "SELECT prediction, accuracy FROM reporteestudiantes WHERE id = %s"
     cursor.execute(sql, (id_student,))
     cursor.close()
-    prediction = cursor.fetchone()
+    value = cursor.fetchall()
+    if value:
+        prediction, accuracy = value[0]  # Desempaquetamos el resultado
 
-    
-    print(id_student)
-    print(prediction)
+    # Ahora puedes usar las variables id_prediccion y porcentaje como desees
+        print(f'ID de la predicción: {prediction}')
+        print(f'Porcentaje de la predicción: {accuracy}')
+    else:
+        print('No se encontraron resultados.')
+        print(id_student)
+        print(value)
 
-   
+    mensajeprediccion = ''
+
+
+    if (prediction == 0):
+            mensajeprediccion = "El rendimiento es ALTO"
+    elif (prediction == 1): 
+            mensajeprediccion = "El rendimiento es MEDIO"
+    elif (prediction == 2): 
+            mensajeprediccion = "El rendimiento es BAJO"
     
-    return jsonify(prediction)
+    return jsonify({'prediction': mensajeprediccion, 'accuracy': accuracy})
 
 
 if __name__ == '__main__':
